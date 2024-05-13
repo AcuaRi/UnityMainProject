@@ -30,35 +30,37 @@ public class ScreenRayCast : MonoBehaviour
         Vector3 moveAmount = moveSpeed * Time.deltaTime * direction;
         //transform.position += moveAmount;
 
-        CalculateRotation1(transform.rotation, direction);
-        // float targetRotationY = MathF.Atan2(direction.y, direction.x)/MathF.PI;
-        // float currentRotationY = transform.rotation.eulerAngles.y;
-        // float rotateAmountY = targetRotationY-currentRotationY;
-        //
-        // Quaternion rotateAmount = Quaternion.Euler(0, rotateAmountY*Time.deltaTime,0);
+        float rotationAmountY = CalculateRotationY(transform.rotation, direction);
+        Quaternion rotationAmount = Quaternion.Euler(0, rotationAmountY * Time.deltaTime ,0);
+        transform.rotation *= rotationAmount;
+        
         if (direction == Vector3.zero)
         {
             return;
         }
        
         Quaternion targetRotation = Quaternion.LookRotation(direction);
-        Quaternion rotateAmount = Quaternion.RotateTowards(transform.rotation, targetRotation, rotateSpeed * Time.deltaTime);
+        //Quaternion rotateAmount = Quaternion.RotateTowards(transform.rotation, targetRotation, rotateSpeed * Time.deltaTime);
         //transform.rotation = rotateAmount;
     }
 
-    private void CalculateRotation1(Quaternion now, Vector3 targetDirection)
+    private float CalculateRotationY(Quaternion now, Vector3 targetDirection)
     {
-        float seta = now.eulerAngles.y + 90; 
+        float seta = (90 - now.eulerAngles.y)/180 * Mathf.PI; 
         float x = Mathf.Cos(seta);
         float z = Mathf.Sin(seta);
 
         float inner = targetDirection.x * x + targetDirection.z * z;
-        float outer = targetDirection.z * x - targetDirection.x * z;
+        float outer = targetDirection.x * z - targetDirection.z * x;
 
         float delta1 = (Mathf.Acos(inner)*180)/Mathf.PI;
         float delta2 = (Mathf.Asin(outer)*180)/Mathf.PI;
                
-        Debug.Log($"내적 {(delta1)} 외적 {delta2}");
+        //Debug.Log($" y각도 {now.eulerAngles.y} 내적 {(delta1)} 외적 {delta2}");
+
+        float rotationAmount = (delta2 >= 0) ? delta1 : -delta1;
+
+        return rotationAmount;
     }
     
 }
